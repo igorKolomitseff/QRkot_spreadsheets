@@ -130,3 +130,6 @@ dmypy.json
 
 # .idea
 .idea
+
+# Databases
+cat_charity_foundation.db
