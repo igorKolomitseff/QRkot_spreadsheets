@@ -5,8 +5,8 @@ from aiogoogle import Aiogoogle
 from app.core.config import settings
 
 FORMAT = '%Y/%m/%d %H:%M:%S'
-ROW_COUNT_SPREADSHEET = 100
-COLUMN_COUNT_SPREADSHEET = 5
+SHEET_ROW_COUNT = 100
+SHEET_COLUMN_COUNT = 5
 SPREADSHEET_BODY_PROPERTIES = {
     'title': 'Отчёт от {current_date_time}',
     'locale': 'ru_RU'
@@ -16,8 +16,8 @@ FIRST_SHEET_PROPERTIES = {
     'sheetId': 0,
     'title': 'Лист1',
     'gridProperties': {
-        'rowCount': ROW_COUNT_SPREADSHEET,
-        'columnCount': COLUMN_COUNT_SPREADSHEET
+        'rowCount': SHEET_ROW_COUNT,
+        'columnCount': SHEET_COLUMN_COUNT
     }
 }
 FIRST_SHEET_COLUMN_HEADERS = [
@@ -25,7 +25,7 @@ FIRST_SHEET_COLUMN_HEADERS = [
     ['Топ проектов по скорости закрытия'],
     ['Название проекта', 'Время сбора', 'Описание']
 ]
-RANGE = 'A1:E{row_count_max}'
+RANGE = 'A1:E{row_count_insert}'
 
 
 async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
@@ -84,7 +84,7 @@ async def spreadsheets_update_value(
     await wrapper_services.as_service_account(
         service.spreadsheets.values.update(
             spreadsheetId=spreadsheet_id,
-            range=RANGE.format(row_count_max=len(table_values)),
+            range=RANGE.format(row_count_insert=len(table_values)),
             valueInputOption='USER_ENTERED',
             json={
                 'majorDimension': 'ROWS',
