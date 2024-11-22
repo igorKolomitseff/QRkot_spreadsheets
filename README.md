@@ -19,7 +19,7 @@
 ## Как развернуть проект
 1. Клонируйте репозиторий и перейдите в директорию QRkot_spreadsheets
 ```bash
-git git@github.com:igorKolomitseff/QRkot_spreadsheets.git
+git clone git@github.com:igorKolomitseff/QRkot_spreadsheets.git
 cd QRkot_spreadsheets
 ```
 
