@@ -17,10 +17,10 @@
 * [Uvicorn](https://www.uvicorn.org/)
 
 ## Как развернуть проект
-1. Клонируйте репозиторий и перейдите в директорию cat_charity_fund
+1. Клонируйте репозиторий и перейдите в директорию QRkot_spreadsheets
 ```bash
-git git@github.com:igorKolomitseff/cat_charity_fund.git
-cd cat_charity_fund
+git git@github.com:igorKolomitseff/QRkot_spreadsheets.git
+cd QRkot_spreadsheets
 ```
 
 2. Создайте виртуальное окружение и активируйте его:
