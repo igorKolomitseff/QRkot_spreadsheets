@@ -1,5 +1,7 @@
+from http import HTTPStatus
+
 from aiogoogle import Aiogoogle
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_async_session
@@ -11,8 +13,6 @@ from app.services.google_api import (
     spreadsheets_create,
     spreadsheets_update_value
 )
-
-SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/'
 
 router = APIRouter()
 
@@ -31,11 +31,19 @@ async def get_closed_projects_report(
     projects = await charity_project_crud.get_projects_by_completion_rate(
         session=session
     )
-    spreadsheet_id = await spreadsheets_create(wrapper_services)
-    await set_user_permissions(spreadsheet_id, wrapper_services)
-    await spreadsheets_update_value(
-        spreadsheet_id,
-        projects,
+    spreadsheet_id, spreadsheet_url = await spreadsheets_create(
         wrapper_services
     )
-    return SPREADSHEET_URL + spreadsheet_id
+    await set_user_permissions(spreadsheet_id, wrapper_services)
+    try:
+        await spreadsheets_update_value(
+            spreadsheet_id,
+            projects,
+            wrapper_services
+        )
+    except ValueError as error:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=str(error)
+        )
+    return spreadsheet_url
