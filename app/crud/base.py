@@ -56,7 +56,8 @@ class CRUDBase:
         self,
         database_object,
         request_object,
-        session: AsyncSession
+        session: AsyncSession,
+        commit: bool = False
     ):
         database_object_data = jsonable_encoder(database_object)
         request_object_data = request_object.dict(exclude_unset=True)
@@ -67,8 +68,9 @@ class CRUDBase:
             database_object.fully_invested = True
             database_object.close_date = datetime.now()
         session.add(database_object)
-        await session.commit()
-        await session.refresh(database_object)
+        if commit:
+            await session.commit()
+            await session.refresh(database_object)
         return database_object
 
     async def remove(self, database_object, session: AsyncSession):

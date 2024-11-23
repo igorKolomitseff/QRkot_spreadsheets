@@ -86,11 +86,21 @@ async def partially_update_charity_project(
             request_project.full_amount,
             database_project.invested_amount
         )
-    return await charity_project_crud.update(
+    updated_project = await charity_project_crud.update(
         database_object=database_project,
         request_object=request_project,
         session=session
     )
+    if not updated_project.fully_invested:
+        session.add_all(
+            investing(
+                target=updated_project,
+                sources=await donation_crud.get_not_closed(session)
+            )
+        )
+    await session.commit()
+    await session.refresh(updated_project)
+    return updated_project
 
 
 @router.delete(
