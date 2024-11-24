@@ -3,48 +3,45 @@ from datetime import datetime
 
 from aiogoogle import Aiogoogle
 
+from .constants import SHEET_COLUMN_COUNT, SHEET_ROW_COUNT
 from .validators import check_column_count, check_row_count
 from app.core.config import settings
 
 FORMAT = '%Y/%m/%d %H:%M:%S'
-SHEET_ROW_COUNT = 100
-SHEET_COLUMN_COUNT = 5
 SPREADSHEET_TITLE = 'Отчёт от {current_date_time}'
-SPREADSHEET_BODY_PROPERTIES = {
-    'title': '',
-    'locale': 'ru_RU'
-}
-FIRST_SHEET_PROPERTIES = {
-    'sheetType': 'GRID',
-    'sheetId': 0,
-    'title': 'Лист1',
-    'gridProperties': {
-        'rowCount': SHEET_ROW_COUNT,
-        'columnCount': SHEET_COLUMN_COUNT
-    }
+SPREADSHEET_BODY = {
+    'properties': {
+        'title': '',
+        'locale': 'ru_RU'
+    },
+    'sheets': [{
+        'properties': {
+            'sheetType': 'GRID',
+            'sheetId': 0,
+            'title': 'Лист1',
+            'gridProperties': {
+                'rowCount': SHEET_ROW_COUNT,
+                'columnCount': SHEET_COLUMN_COUNT
+            }
+        }
+    }]
 }
 FIRST_SHEET_COLUMN_HEADERS = [
     ['Отчёт от'],
     ['Топ проектов по скорости закрытия'],
     ['Название проекта', 'Время сбора', 'Описание']
 ]
-RANGE = 'R1C1:R{insert_row_count}C{insert_column_count}'
 
 
 async def spreadsheets_create(wrapper_services: Aiogoogle) -> tuple[str, str]:
     service = await wrapper_services.discover('sheets', 'v4')
-    spreadsheet_body_properties = copy.deepcopy(SPREADSHEET_BODY_PROPERTIES)
-    spreadsheet_body_properties['title'] = SPREADSHEET_TITLE.format(
+    spreadsheet_body = copy.deepcopy(SPREADSHEET_BODY)
+    spreadsheet_body['properties']['title'] = SPREADSHEET_TITLE.format(
         current_date_time=datetime.now().strftime(FORMAT)
     )
     response = await wrapper_services.as_service_account(
         service.spreadsheets.create(
-            json={
-                'properties': spreadsheet_body_properties,
-                'sheets': [{
-                    'properties': FIRST_SHEET_PROPERTIES
-                }]
-            }
+            json=spreadsheet_body
         )
     )
     return response['spreadsheetId'], response['spreadsheetUrl']
@@ -86,15 +83,12 @@ async def spreadsheets_update_value(
     ]
     insert_row_count = len(table_values)
     insert_column_count = max(map(len, table_values))
-    check_row_count(insert_row_count, SHEET_ROW_COUNT)
-    check_column_count(insert_column_count, SHEET_COLUMN_COUNT)
+    check_row_count(insert_row_count)
+    check_column_count(insert_column_count)
     await wrapper_services.as_service_account(
         service.spreadsheets.values.update(
             spreadsheetId=spreadsheet_id,
-            range=RANGE.format(
-                insert_row_count=insert_row_count,
-                insert_column_count=insert_column_count
-            ),
+            range=f'R1C1:R{insert_row_count}C{insert_column_count}',
             valueInputOption='USER_ENTERED',
             json={
                 'majorDimension': 'ROWS',
